@@ -105,9 +105,12 @@ Bootstrapped with [Forge](https://github.com/)${TEMPLATE:+ using the \`$TEMPLATE
 Cross-agent context lives in \`project_context/\`:
 
 - \`PRODUCT.md\` — what you're building and for whom
+- \`DESIGN.md\` — design tokens, components, flows, a11y floor
 - \`ARCHITECTURE.md\` — system design decisions
 - \`CONVENTIONS.md\` — code style and patterns
 - \`INTERFACES.md\` — contracts between modules
+- \`ANALYTICS.md\` — event schema, KPIs, funnels, experiments
+- \`SECURITY.md\` — threat model, auth, secrets, data classification
 - \`ERRORS_LOG.md\` — failures and their fixes
 - \`PROGRESS.md\` — current task status
 EOF

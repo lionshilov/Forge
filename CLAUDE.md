@@ -20,7 +20,10 @@ RECEIVE task
 | Agent | Directory | Responsibility |
 |-------|-----------|----------------|
 | Product | `agents/product/` | Turn the idea into MVP spec, user stories, success metrics |
+| Designer | `agents/designer/` | Design system, user flows, tokens, a11y floor |
 | Architect | `agents/architect/` | Project structure, ADRs, interfaces, conventions |
+| Analyst | `agents/analyst/` | Event schema, KPIs, funnels, A/B tests, dashboards |
+| Security | `agents/security/` | Threat model, auth, secrets, OWASP review |
 | iOS/Swift | `agents/ios-swift/` | UIKit, SwiftUI, CoreML, AVFoundation, async/await |
 | Frontend-Web | `agents/frontend-web/` | React, Next.js, Vue, Svelte, Tailwind, a11y, Web Vitals |
 | Backend | `agents/backend/` | API, DB, business logic, server-side |
@@ -31,12 +34,15 @@ RECEIVE task
 
 ## Routing Rules
 1. Every new project starts with **Product** — no architecture before the MVP is defined
-2. **Product** produces `project_context/PRODUCT.md` before the Architect is called
-3. **Architect** produces `ARCHITECTURE.md`, `CONVENTIONS.md`, `INTERFACES.md` before any implementation agent starts
-4. **QA** reviews every implementation agent's output before it's accepted
-5. If two agents need to collaborate (e.g., Frontend-Web + Backend), **Architect** defines the interface contract FIRST
-6. **DevOps** is called after first working code exists, not before
-7. **Docs** runs last, after QA approval
+2. **Product** produces `project_context/PRODUCT.md` before anything downstream runs
+3. **Designer** produces `project_context/DESIGN.md` before Frontend-Web or iOS/Swift build any UI
+4. **Architect** produces `ARCHITECTURE.md`, `CONVENTIONS.md`, `INTERFACES.md` before any implementation agent starts
+5. **Analyst** produces `project_context/ANALYTICS.md` after Architect; every KPI in PRODUCT.md must map to at least one tracked event
+6. **Security** produces `project_context/SECURITY.md` after Architect (threat model, auth, secret handling) and re-reviews before DevOps ships externally
+7. **QA** reviews every implementation agent's output before it's accepted
+8. If two agents need to collaborate (e.g., Frontend-Web + Backend), **Architect** defines the interface contract FIRST
+9. **DevOps** is called after first working code exists AND Security has signed off on the external surface
+10. **Docs** runs last, after QA approval
 
 ## Decomposition Rules
 - A subtask is **atomic** if one agent can complete it without input from another agent
@@ -55,9 +61,12 @@ RECEIVE task
 ## Shared Context
 Before delegating, ensure agents have access to:
 - `project_context/PRODUCT.md` — what we're building and for whom
+- `project_context/DESIGN.md` — design tokens, components, flows, a11y floor
 - `project_context/ARCHITECTURE.md` — decisions and structure
 - `project_context/CONVENTIONS.md` — coding style, patterns, anti-patterns
 - `project_context/INTERFACES.md` — contracts between modules
+- `project_context/ANALYTICS.md` — event schema, KPIs, funnels, experiments
+- `project_context/SECURITY.md` — threat model, auth, secrets, data classification
 - `project_context/ERRORS_LOG.md` — past mistakes and solutions
 - `project_context/PROGRESS.md` — current status of all tasks
 

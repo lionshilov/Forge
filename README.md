@@ -10,7 +10,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/lionshilov/Forge/ci.yml?branch=main&label=CI)](https://github.com/lionshilov/Forge/actions/workflows/ci.yml)
 [![Stars](https://img.shields.io/github/stars/lionshilov/Forge?style=social)](https://github.com/lionshilov/Forge/stargazers)
 
-**Describe what you want. Forge's orchestrator decomposes it, routes each subtask to the right specialist (Product, Architect, iOS, Frontend, Backend, ML/CV, DevOps, QA, Docs), reviews every output, and hands you a working MVP.**
+**Describe what you want. Forge's orchestrator decomposes it, routes each subtask to the right specialist (Product, Designer, Architect, Analyst, Security, iOS, Frontend, Backend, ML/CV, DevOps, QA, Docs), reviews every output, and hands you a working MVP.**
 
 [Quickstart](#-quickstart) • [How it works](#-how-it-works) • [The agents](#-the-agents) • [Examples](./examples/quickstart.md) • [FAQ](#-faq)
 
@@ -20,7 +20,7 @@
 
 ## ✨ Why Forge
 
-- 🧠 **One generalist prompt ≠ a team.** Forge gives you *nine* deep specialists instead of one shallow everything-agent.
+- 🧠 **One generalist prompt ≠ a team.** Forge gives you *twelve* deep specialists instead of one shallow everything-agent.
 - 🗂️ **Shared memory that survives handoffs.** Every agent reads `project_context/` first — nothing gets lost between steps.
 - 🛡️ **QA is mandatory, not optional.** No output ships until reviewed against your project's explicit conventions.
 - 🔌 **Zero install.** No framework, no runtime — just Markdown prompts and a folder convention. Drop it into any repo.
@@ -40,8 +40,17 @@ flowchart LR
     O --> P[📋 Product]
     P -->|MVP spec| O
 
+    O --> DS[🎨 Designer]
+    DS -->|Design system| O
+
     O --> A[🏛️ Architect]
     A -->|Stack + interfaces| O
+
+    O --> AN[🧪 Analyst]
+    AN -->|Event schema| O
+
+    O --> SEC[🔒 Security]
+    SEC -->|Threat model| O
 
     O --> iOS[📱 iOS]
     O --> FE[🌐 Frontend]
@@ -64,8 +73,8 @@ flowchart LR
     classDef phase fill:#1a1a1a,stroke:#555,color:#fff
     classDef agent fill:#2d4a2b,stroke:#4caf50,color:#fff
     classDef review fill:#5a3a1a,stroke:#ff9800,color:#fff
-    class O,QA review
-    class P,A,iOS,FE,BE,ML,DO,D agent
+    class O,QA,SEC review
+    class P,DS,A,AN,iOS,FE,BE,ML,DO,D agent
 ```
 
 ### Why it works: shared context
@@ -76,9 +85,12 @@ Every agent reads from the same shared brain before starting. That's why handoff
 flowchart TB
     subgraph ctx["🗂️ project_context/ — shared memory"]
         PRD[PRODUCT.md<br/>what & for whom]
+        DSG[DESIGN.md<br/>tokens & flows]
         ARCH[ARCHITECTURE.md<br/>stack & structure]
         CONV[CONVENTIONS.md<br/>style & patterns]
         INT[INTERFACES.md<br/>module contracts]
+        ANA[ANALYTICS.md<br/>events & KPIs]
+        SECM[SECURITY.md<br/>threat model]
         ERR[ERRORS_LOG.md<br/>past failures]
         PRG[PROGRESS.md<br/>task status]
     end
@@ -86,14 +98,20 @@ flowchart TB
     subgraph agents["🤖 Specialist agents"]
         direction LR
         P[Product]
+        DS[Designer]
         A[Architect]
+        AN[Analyst]
+        SEC[Security]
         SPEC[iOS • Frontend<br/>Backend • ML/CV]
         Q[QA]
         DOC[Docs]
     end
 
     P -.writes.-> PRD
+    DS -.writes.-> DSG
     A -.writes.-> ARCH & CONV & INT
+    AN -.writes.-> ANA
+    SEC -.writes.-> SECM
     Q -.writes.-> ERR
     SPEC -.reads.-> ctx
     DOC -.reads.-> ctx
@@ -101,8 +119,8 @@ flowchart TB
 
     classDef ctxFile fill:#0d2b4a,stroke:#2196f3,color:#fff
     classDef agentNode fill:#2d4a2b,stroke:#4caf50,color:#fff
-    class PRD,ARCH,CONV,INT,ERR,PRG ctxFile
-    class P,A,SPEC,Q,DOC agentNode
+    class PRD,DSG,ARCH,CONV,INT,ANA,SECM,ERR,PRG ctxFile
+    class P,DS,A,AN,SEC,SPEC,Q,DOC agentNode
 ```
 
 ### What happens to a single task
@@ -182,13 +200,16 @@ Skip the scaffolding and start with a working stack:
 | Agent | Role | When it runs |
 |---|---|---|
 | 📋 **Product** | Idea → MVP spec (user stories, scope, metrics) | **First.** Always. |
+| 🎨 **Designer** | Design system, flows, tokens, a11y floor | After Product, before any UI is built |
 | 🏛️ **Architect** | Tech stack, directory structure, ADRs, interfaces | After Product, before any code |
+| 🧪 **Analyst** | Event schema, KPIs, funnels, A/B tests | After Architect, before instrumentation lands |
+| 🔒 **Security** | Threat model, auth, secrets, OWASP review | After Architect, re-reviews before ship |
 | 📱 **iOS / Swift** | SwiftUI, UIKit, CoreML, HealthKit, async/await | Parallel with other specialists |
 | 🌐 **Frontend-Web** | React, Next.js, Vue, Svelte, Tailwind, a11y | Parallel with other specialists |
 | ⚙️ **Backend** | REST/GraphQL, Postgres/Redis, auth, Docker | Parallel with other specialists |
 | 🧠 **ML / CV** | PyTorch, CoreML, real-time inference pipelines | When models are part of the product |
 | 🛡️ **QA** | Reviews every output, logs failures, enforces conventions | After every specialist output |
-| 🚀 **DevOps** | CI/CD, Fastlane, TestFlight, Docker deploy | Once there's working code |
+| 🚀 **DevOps** | CI/CD, Fastlane, TestFlight, Docker deploy | Once there's working code + Security sign-off |
 | 📖 **Docs** | README, API docs, changelog, diagrams | Last — after QA approves |
 
 Every agent is one Markdown file under `agents/<name>/CLAUDE.md`. Read it, tweak it, PR it.
@@ -207,14 +228,20 @@ forge/
 │   └── forge-init.sh            ← Bootstrap a new project
 ├── project_context/             ← Shared memory templates
 │   ├── PRODUCT.md
+│   ├── DESIGN.md
 │   ├── ARCHITECTURE.md
 │   ├── CONVENTIONS.md
 │   ├── INTERFACES.md
+│   ├── ANALYTICS.md
+│   ├── SECURITY.md
 │   ├── ERRORS_LOG.md
 │   └── PROGRESS.md
 ├── agents/                      ← One folder per specialist
 │   ├── product/
+│   ├── designer/
 │   ├── architect/
+│   ├── analyst/
+│   ├── security/
 │   ├── ios-swift/
 │   ├── frontend-web/
 │   ├── backend/
@@ -335,7 +362,7 @@ After 3 retries the Orchestrator escalates to you. Usually it means `PRODUCT.md`
 
 We'd love your help — especially:
 
-- 🆕 **New agents** (Android, Data/Analytics, Game dev, Rust/systems, SRE)
+- 🆕 **New agents** (Android, Game dev, Rust/systems, SRE, Growth/ASO, Data Engineering)
 - 📦 **Templates** for common stacks (Next.js + Supabase, FastAPI + Postgres, etc.)
 - 🐛 **Anti-pattern PRs** — found a failure mode? Add it to an agent's blocklist.
 - 📖 **Examples** — real projects built with Forge
