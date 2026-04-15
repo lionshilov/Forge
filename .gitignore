@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code local state (per-user, don't commit)
+.claude/settings.local.json
+.claude/shell-snapshots/
+.claude/todos/
+.claude/projects/
+.claude/ide/
+.claude/statsig/
+.claude/cache/
+
+# Logs
+*.log
+logs/
+
+# Dependencies (user projects)
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build output (user projects)
+dist/
+build/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
