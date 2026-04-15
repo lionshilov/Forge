@@ -158,6 +158,22 @@ Claude auto-loads the root `CLAUDE.md` and takes on the **Orchestrator** role. F
 
 📖 **Full walkthrough:** [examples/quickstart.md](./examples/quickstart.md)
 
+### Starter templates
+
+Skip the scaffolding and start with a working stack:
+
+```bash
+./scripts/forge-init.sh ~/code/my-tool "My Tool" --template vanilla-static
+./scripts/forge-init.sh ~/code/my-web  "My Web"  --template nextjs-supabase
+./scripts/forge-init.sh ~/code/my-ios  "My iOS" --template swiftui-ios
+```
+
+| Template | What you get |
+|---|---|
+| `vanilla-static` | Single `index.html`, dark theme, GitHub Pages workflow — zero build step |
+| `nextjs-supabase` | Next.js 15 App Router + Supabase (SSR), Tailwind, TypeScript strict |
+| `swiftui-ios` | SwiftUI MVVM drop-in (`@Observable`), APIClient, Theme tokens |
+
 ---
 
 ## 🤖 The agents

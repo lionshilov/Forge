@@ -67,6 +67,15 @@ For EVERY review, check:
 3. If you see a pattern that will cause future bugs — flag it even if current code works
 4. Check ERRORS_LOG.md — if this mistake was made before, severity goes up
 5. Never pass code that violates CONVENTIONS.md
+6. If an issue was preventable by the submitting agent's "Before Submitting" checklist, call that out in the review — it's a sign the agent skipped self-review
+
+## Before Finalizing a Review
+- [ ] Walked through every item in the reviewed agent's "Before Submitting" checklist
+- [ ] Walked through `CONVENTIONS.md` anti-patterns line by line
+- [ ] Checked `ERRORS_LOG.md` for repeated mistakes (bump severity if repeat)
+- [ ] Verified the output matches the `INTERFACES.md` contract where applicable
+- [ ] Wrote specific, actionable feedback (file:line + suggested fix, not "looks wrong")
+- [ ] Logged FAIL outcomes to `ERRORS_LOG.md` with the full ERR- format before returning
 
 ## Anti-Patterns
 - ❌ Rubber-stamp approvals

@@ -30,6 +30,17 @@ Read IN ORDER:
 - Thread safety: MainActor for UI, proper actor isolation
 - Accessibility: VoiceOver labels on interactive elements
 
+## Before Submitting
+Run this checklist on your output *before* handing off to QA:
+- [ ] Zero force unwraps without a `// safe because ...` justification comment
+- [ ] Zero retain cycles — every closure captures `[weak self]` or `[unowned self]` with a reason
+- [ ] UI work is on `@MainActor`; heavy work explicitly off-main
+- [ ] Every interactive SwiftUI view / UIKit control has accessibility labels
+- [ ] No network calls inside `View`/`ViewController` — delegated to ViewModel/service
+- [ ] Public API surface has documentation comments
+- [ ] Error paths use `Result` or `throws`, never silent `try?` without a why
+- [ ] Walk through `CONVENTIONS.md` anti-patterns — any apply?
+
 ## Anti-Patterns
 - ❌ Massive ViewControllers (>300 lines → split)
 - ❌ Storyboards or xibs

@@ -28,6 +28,17 @@ Read IN ORDER:
 - Health checks on all services
 - Build times documented and optimized
 
+## Before Submitting
+Run this checklist on your pipeline/config *before* handing off to QA:
+- [ ] CI runs on every PR with at least: lint + test + build
+- [ ] Deploy is either a single command or auto-triggered by merge to main
+- [ ] No secrets in the repo (search the diff for common keys: `AWS_`, `_TOKEN`, `SECRET_`, `PRIVATE_KEY`)
+- [ ] `.env.example` exists with every required variable named
+- [ ] Rollback procedure documented in a `DEPLOY.md` or README section
+- [ ] Health/readiness checks defined for each service
+- [ ] CI total time < 15 min (caching applied where possible)
+- [ ] Branch protection configured on the default branch (documented if manual)
+
 ## Anti-Patterns
 - ❌ Manual deployments
 - ❌ Secrets in git

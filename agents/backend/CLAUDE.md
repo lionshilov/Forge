@@ -29,6 +29,18 @@ Read IN ORDER:
 - Error responses follow a consistent format
 - Logging: structured, with request IDs
 
+## Before Submitting
+Run this checklist on your output *before* handing off to QA:
+- [ ] Every endpoint has input validation (no trusted-client assumptions)
+- [ ] Every endpoint returns the status code that matches the outcome (not 200 for errors)
+- [ ] Response shape matches `INTERFACES.md` exactly — field names, types, nullability
+- [ ] No secrets in code or committed config (check `.env.example` only)
+- [ ] Database migrations are reversible (or explicitly documented as one-way with a why)
+- [ ] No business logic in route handlers — extracted to services/use-cases
+- [ ] No N+1 queries — explain eager-loading choices in code where non-obvious
+- [ ] Structured logging with request IDs on every handler
+- [ ] Walk through `CONVENTIONS.md` anti-patterns — any apply?
+
 ## Anti-Patterns
 - ❌ Business logic in route handlers
 - ❌ N+1 queries

@@ -29,6 +29,17 @@ Read IN ORDER:
 - Preprocessing must match training exactly (normalization, color space)
 - Fallback behavior when model unavailable
 
+## Before Submitting
+Run this checklist on your output *before* handing off to QA:
+- [ ] Model metrics documented: accuracy, latency, size, memory
+- [ ] Profiled on the actual target device (not just dev machine)
+- [ ] Input/output shapes + dtypes written into `INTERFACES.md`
+- [ ] Preprocessing code matches training-time preprocessing *exactly* (normalization, color space, resize method)
+- [ ] Training/validation/test split documented and leakage-free
+- [ ] Fallback behavior defined for when the model fails to load or run
+- [ ] Quantization attempted (int8/float16) if target device benefits
+- [ ] Walk through `CONVENTIONS.md` anti-patterns — any apply?
+
 ## Anti-Patterns
 - ❌ Training without validation split
 - ❌ Deploying without profiling on target device

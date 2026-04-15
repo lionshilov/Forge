@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My App</title>
+  <meta name="description" content="Describe the app in one sentence." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='48'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --bg-elev: #14171c;
+      --fg: #e6e8eb;
+      --fg-dim: #8b92a0;
+      --fg-faint: #545a68;
+      --accent: #7c9eff;
+      --accent-glow: rgba(124, 158, 255, 0.18);
+      --border: #242932;
+      --radius: 12px;
+      --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    body {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, var(--accent-glow), transparent 70%),
+        var(--bg);
+    }
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    h1 {
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin: 0 0 16px;
+    }
+    p { color: var(--fg-dim); line-height: 1.6; }
+
+    @media (max-width: 560px) {
+      main { padding: 32px 16px 60px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>My App</h1>
+    <p>This is a vanilla-static template. One HTML file, no build step, no deps.</p>
+    <p>Edit <code>index.html</code> and add your own logic in the <code>&lt;script&gt;</code> block below.</p>
+  </main>
+  <script>
+    'use strict';
+    // Your app code goes here.
+    console.log('Hello from the vanilla-static template.');
+  </script>
+</body>
+</html>
