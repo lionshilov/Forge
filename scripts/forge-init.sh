@@ -77,6 +77,16 @@ cp -R "$FORGE_ROOT/agents" "$TARGET/agents"
 cp -R "$FORGE_ROOT/project_context" "$TARGET/project_context"
 cp "$FORGE_ROOT/.gitignore" "$TARGET/.gitignore"
 
+# Copy Claude Code subagent definitions (.claude/agents/) — these register
+# real subagents in the new project so the Orchestrator can dispatch heavy
+# work (iOS, Frontend, Backend, ML, QA, DevOps) via the Task tool.
+# NOTE: .claude/settings.local.json is intentionally NOT copied — it's
+# per-user machine state, not shared project config.
+if [[ -d "$FORGE_ROOT/.claude/agents" ]]; then
+  mkdir -p "$TARGET/.claude"
+  cp -R "$FORGE_ROOT/.claude/agents" "$TARGET/.claude/agents"
+fi
+
 # Layer template on top (if any)
 if [[ -n "$TEMPLATE" ]]; then
   # -R preserves structure; overwriting is fine since target is empty of template files

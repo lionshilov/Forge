@@ -214,6 +214,19 @@ Skip the scaffolding and start with a working stack:
 
 Every agent is one Markdown file under `agents/<name>/CLAUDE.md`. Read it, tweak it, PR it.
 
+### Dispatch: role-switch vs subagent
+
+Forge ships two dispatch modes; the Orchestrator picks per task:
+
+- **role-switch** (Product, Designer, Architect, Analyst, Security, Docs) — Orchestrator reads the agent's prompt into the current context. Cheap, visible, good for agents that mostly author a single `project_context/*.md` file.
+- **subagent** (iOS, Frontend-Web, Backend, ML/CV, QA, DevOps) — Orchestrator calls Claude Code's `Task` tool with `subagent_type: "<name>"`, registered in `.claude/agents/<name>.md`. Each subagent runs in an isolated context with scoped tools, which means:
+  - Heavy code generation doesn't clog the main thread
+  - Frontend + Backend can run in parallel
+  - QA is *read-only* by design — it literally cannot patch the code under review
+  - DevOps tool scope is constrained separately from Backend
+
+Both modes read from the same `project_context/` — handoffs are still consistent.
+
 ---
 
 ## 🗂️ Project layout
@@ -236,7 +249,14 @@ forge/
 │   ├── SECURITY.md
 │   ├── ERRORS_LOG.md
 │   └── PROGRESS.md
-├── agents/                      ← One folder per specialist
+├── .claude/agents/              ← Claude Code subagent registrations
+│   ├── ios-swift.md             ← heavy / parallelizable agents get
+│   ├── frontend-web.md            isolated context via Task tool
+│   ├── backend.md                 (YAML frontmatter: name, tools, model)
+│   ├── ml-cv.md
+│   ├── qa.md                    ← read-only by design
+│   └── devops.md
+├── agents/                      ← One folder per specialist (full prompts)
 │   ├── product/
 │   ├── designer/
 │   ├── architect/
@@ -335,7 +355,12 @@ It's designed for Claude Code because it relies on the root `CLAUDE.md` auto-loa
 <details>
 <summary><b>How does the Orchestrator actually "delegate" if it's all one Claude session?</b></summary>
 
-It switches role by reading the target agent's `CLAUDE.md` into context before each subtask. You can also spawn genuine subagents via Claude Code's Agent tool — the routing rules in root `CLAUDE.md` stay identical.
+Two modes, picked per task:
+
+1. **Role-switch** (default for Product, Designer, Architect, Analyst, Security, Docs) — Orchestrator reads `agents/<name>/CLAUDE.md` into the current context and continues in that role. One session, visible in the main thread.
+2. **Subagent** (default for iOS, Frontend, Backend, ML, QA, DevOps) — Orchestrator calls Claude Code's `Task` tool with the matching `subagent_type`. Subagents are registered in `.claude/agents/<name>.md` with YAML frontmatter (name, tools, model). They run in isolated contexts with scoped tools and return a summary. QA is locked to read-only this way — it cannot silently modify the code it's reviewing.
+
+Both modes read the same `project_context/*.md` files, so handoffs stay consistent regardless of which mode was used.
 </details>
 
 <details>

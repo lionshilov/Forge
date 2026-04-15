@@ -17,20 +17,26 @@ RECEIVE task
 
 ## Available Agents
 
-| Agent | Directory | Responsibility |
-|-------|-----------|----------------|
-| Product | `agents/product/` | Turn the idea into MVP spec, user stories, success metrics |
-| Designer | `agents/designer/` | Design system, user flows, tokens, a11y floor |
-| Architect | `agents/architect/` | Project structure, ADRs, interfaces, conventions |
-| Analyst | `agents/analyst/` | Event schema, KPIs, funnels, A/B tests, dashboards |
-| Security | `agents/security/` | Threat model, auth, secrets, OWASP review |
-| iOS/Swift | `agents/ios-swift/` | UIKit, SwiftUI, CoreML, AVFoundation, async/await |
-| Frontend-Web | `agents/frontend-web/` | React, Next.js, Vue, Svelte, Tailwind, a11y, Web Vitals |
-| Backend | `agents/backend/` | API, DB, business logic, server-side |
-| DevOps | `agents/devops/` | CI/CD, infrastructure, deploy, scripts |
-| ML/CV | `agents/ml-cv/` | Models, pipelines, CoreML export, training |
-| QA | `agents/qa/` | Code review, tests, linting, error logging |
-| Docs | `agents/docs/` | README, API docs, changelog, comments |
+| Agent | Directory | Dispatch mode | Responsibility |
+|-------|-----------|---------------|----------------|
+| Product | `agents/product/` | role-switch | Turn the idea into MVP spec, user stories, success metrics |
+| Designer | `agents/designer/` | role-switch | Design system, user flows, tokens, a11y floor |
+| Architect | `agents/architect/` | role-switch | Project structure, ADRs, interfaces, conventions |
+| Analyst | `agents/analyst/` | role-switch | Event schema, KPIs, funnels, A/B tests, dashboards |
+| Security | `agents/security/` | role-switch | Threat model, auth, secrets, OWASP review |
+| iOS/Swift | `agents/ios-swift/` | **subagent** (`ios-swift`) | UIKit, SwiftUI, CoreML, AVFoundation, async/await |
+| Frontend-Web | `agents/frontend-web/` | **subagent** (`frontend-web`) | React, Next.js, Vue, Svelte, Tailwind, a11y, Web Vitals |
+| Backend | `agents/backend/` | **subagent** (`backend`) | API, DB, business logic, server-side |
+| ML/CV | `agents/ml-cv/` | **subagent** (`ml-cv`) | Models, pipelines, CoreML export, training |
+| QA | `agents/qa/` | **subagent** (`qa`, read-only) | Code review, tests, linting, error logging |
+| DevOps | `agents/devops/` | **subagent** (`devops`) | CI/CD, infrastructure, deploy, scripts |
+| Docs | `agents/docs/` | role-switch | README, API docs, changelog, comments |
+
+### Dispatch modes
+- **role-switch**: Orchestrator reads the agent's `agents/<name>/CLAUDE.md` into the current context and continues the conversation in that role. Cheap, keeps the main thread visible, good for agents that write a single `project_context/*.md` file and need live dialog with the user.
+- **subagent**: Orchestrator calls the `Task` tool with `subagent_type: "<name>"` (defined in `.claude/agents/<name>.md`). The subagent runs in an isolated context with scoped tools, returns a summary. Used for heavy code generation (iOS, Frontend, Backend, ML), honest isolated review (QA — explicitly read-only), and infra scope control (DevOps).
+
+When delegating to a subagent, the Orchestrator MUST include in the prompt: the task spec, the subtask acceptance criteria, and the exact list of `project_context/*.md` files the agent must read first.
 
 ## Routing Rules
 1. Every new project starts with **Product** — no architecture before the MVP is defined
