@@ -13,7 +13,7 @@ jobs:
     name: ShellCheck (scripts/)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ludeeus/action-shellcheck@master
         with:
           scandir: './scripts'
@@ -22,7 +22,7 @@ jobs:
     name: forge-init.sh smoke test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Bootstrap bare project
         run: ./scripts/forge-init.sh /tmp/forge-bare "Bare"
       - name: Bootstrap vanilla-static template
@@ -45,7 +45,7 @@ jobs:
     name: Agent prompt structure
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Every agent has required sections
         run: |
           set -euo pipefail
@@ -70,7 +70,7 @@ jobs:
     name: Markdown links
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check links with lychee
         uses: lycheeverse/lychee-action@v2
         with:
