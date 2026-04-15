@@ -1,0 +1,16 @@
+# CODEOWNERS
+# Automatically requests review from the repo maintainer on every PR.
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*                           @lionshilov
+
+# Agent prompts — maintainer review mandatory (prompt changes are high-leverage)
+/agents/                    @lionshilov
+/CLAUDE.md                  @lionshilov
+
+# Templates ship real code to users — extra care
+/templates/                 @lionshilov
+
+# CI and settings
+/.github/                   @lionshilov
+/scripts/                   @lionshilov
