@@ -7,7 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Built for Claude Code](https://img.shields.io/badge/Built%20for-Claude%20Code-000?logo=anthropic)](https://claude.com/claude-code)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
-[![Stars](https://img.shields.io/github/stars/forge/forge?style=social)](#)
+[![CI](https://img.shields.io/github/actions/workflow/status/lionshilov/Forge/ci.yml?branch=main&label=CI)](https://github.com/lionshilov/Forge/actions/workflows/ci.yml)
+[![Stars](https://img.shields.io/github/stars/lionshilov/Forge?style=social)](https://github.com/lionshilov/Forge/stargazers)
 
 **Describe what you want. Forge's orchestrator decomposes it, routes each subtask to the right specialist (Product, Architect, iOS, Frontend, Backend, ML/CV, DevOps, QA, Docs), reviews every output, and hands you a working MVP.**
 
@@ -139,7 +140,7 @@ sequenceDiagram
 
 ```bash
 # 1. Clone Forge
-git clone https://github.com/<you>/forge.git
+git clone https://github.com/lionshilov/Forge.git
 cd forge
 
 # 2. Bootstrap a new project (copies agents + context into a fresh dir)
