@@ -60,7 +60,7 @@ FORGE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 if [[ -n "$TEMPLATE" && ! -d "$FORGE_ROOT/templates/$TEMPLATE" ]]; then
   echo "Unknown template: $TEMPLATE" >&2
   echo "Available templates:" >&2
-  ls "$FORGE_ROOT/templates" 2>/dev/null | sed 's/^/  /' >&2
+  find "$FORGE_ROOT/templates" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null | sort | sed 's/^/  /' >&2
   exit 1
 fi
 
@@ -148,9 +148,21 @@ See `Sources/` for the MVVM starter.
 EOF
 fi
 
-# Git init
+# Git init. If the user hasn't configured git identity (e.g. CI, fresh machine),
+# init the repo but skip the initial commit — the user can commit once they
+# configure their identity. Forge doesn't need to force a commit to be useful.
 if [[ ! -d "$TARGET/.git" ]]; then
-  (cd "$TARGET" && git init -q && git add -A && git commit -q -m "Initial commit (bootstrapped with Forge${TEMPLATE:+, $TEMPLATE template})")
+  (
+    cd "$TARGET"
+    git init -q
+    if git config user.email >/dev/null 2>&1 && git config user.name >/dev/null 2>&1; then
+      git add -A
+      git commit -q -m "Initial commit (bootstrapped with Forge${TEMPLATE:+, $TEMPLATE template})"
+    else
+      git add -A
+      echo "  (git identity not configured — staged changes but didn't commit)" >&2
+    fi
+  )
 fi
 
 cat <<EOF
