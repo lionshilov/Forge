@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck (scripts/)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+
+  smoke-test:
+    name: forge-init.sh smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap bare project
+        run: ./scripts/forge-init.sh /tmp/forge-bare "Bare"
+      - name: Bootstrap vanilla-static template
+        run: ./scripts/forge-init.sh /tmp/forge-vanilla "Vanilla" --template vanilla-static
+      - name: Bootstrap nextjs-supabase template
+        run: ./scripts/forge-init.sh /tmp/forge-next "Next" --template nextjs-supabase
+      - name: Bootstrap swiftui-ios template
+        run: ./scripts/forge-init.sh /tmp/forge-ios "iOS" --template swiftui-ios
+      - name: Verify all projects have required files
+        run: |
+          set -euo pipefail
+          for dir in /tmp/forge-bare /tmp/forge-vanilla /tmp/forge-next /tmp/forge-ios; do
+            for f in CLAUDE.md README.md agents project_context; do
+              test -e "$dir/$f" || { echo "❌ Missing $f in $dir"; exit 1; }
+            done
+            echo "✓ $dir has required structure"
+          done
+
+  agent-structure:
+    name: Agent prompt structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every agent has required sections
+        run: |
+          set -euo pipefail
+          failed=0
+          for f in agents/*/CLAUDE.md; do
+            # Skip the orchestrator placeholder (it deliberately redirects to root CLAUDE.md)
+            if [ "$f" = "agents/orchestrator/CLAUDE.md" ]; then continue; fi
+            missing=""
+            grep -q '^## Role' "$f" || missing="$missing Role"
+            grep -qE '^## (Expertise|Responsibilities)' "$f" || missing="$missing Expertise-or-Responsibilities"
+            grep -q '^## Anti-Patterns' "$f" || missing="$missing Anti-Patterns"
+            if [ -n "$missing" ]; then
+              echo "❌ $f is missing:$missing"
+              failed=1
+            else
+              echo "✓ $f"
+            fi
+          done
+          exit $failed
+
+  markdown-links:
+    name: Markdown links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check links with lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --verbose --no-progress --offline './**/*.md'
+          fail: true

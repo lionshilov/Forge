@@ -1,0 +1,53 @@
+name: 🐛 Bug report
+description: Something in Forge misbehaves — an agent prompt, the init script, a template.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please fill in what you can — vague bugs are hard to fix.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you try, and what went wrong?
+      placeholder: I ran `./scripts/forge-init.sh …` and got …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: I expected the script to produce a `nextjs-supabase/` folder with …
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or actions. Copy-pasteable beats prose.
+      render: bash
+      placeholder: |
+        git clone …
+        ./scripts/forge-init.sh /tmp/x --template …
+    validations:
+      required: true
+  - type: input
+    id: affected
+    attributes:
+      label: Where is the bug?
+      description: Agent name, template name, script, README section, etc.
+      placeholder: agents/product/CLAUDE.md, or scripts/forge-init.sh, or …
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS + shell + Claude Code version (if relevant).
+      placeholder: macOS 15.2, zsh, Claude Code 1.x
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Logs, screenshots, or context that would help.

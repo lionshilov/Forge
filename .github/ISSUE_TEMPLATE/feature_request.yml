@@ -1,0 +1,37 @@
+name: 💡 Feature request
+description: An improvement to an existing agent, template, or the init flow.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Forge is opinionated by design — we prefer depth over breadth.
+        For a brand-new specialist agent, use the "Propose a new agent" template instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What's missing or frustrating today? Real situation, not abstract.
+      placeholder: When I try to ship a Python backend, the Backend agent …
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What change would fix it?
+      placeholder: Add a `## Before Submitting` item that requires …
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you think about? Why was this better?
+  - type: input
+    id: scope
+    attributes:
+      label: Which agent/template/file?
+      placeholder: agents/backend/CLAUDE.md
+    validations:
+      required: true

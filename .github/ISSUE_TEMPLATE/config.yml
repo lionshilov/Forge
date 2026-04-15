@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a question or share an idea
+    url: https://github.com/lionshilov/Forge/discussions
+    about: For open-ended questions, ideas, or showing off something you built with Forge.
+  - name: 📖 Read the docs
+    url: https://github.com/lionshilov/Forge#readme
+    about: Quickstart, architecture, and how to customize agents.

@@ -32,6 +32,17 @@ Rules for writing prompts:
 2. Create a branch: `feat/new-agent-android` or `fix/architect-prompt`
 3. Keep PRs focused — one agent or one fix per PR
 4. In the PR description, explain *why* the change helps Forge build better MVPs
+5. CI will run ShellCheck on `scripts/`, validate every agent prompt has the
+   required sections, and smoke-test `forge-init.sh` against all templates.
+   Green CI is required before review.
+
+## Code of conduct
+
+By participating you agree to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+## Reporting security issues
+
+See [SECURITY.md](./SECURITY.md) — please don't file security bugs as public issues.
 
 ## Scope
 

@@ -1,0 +1,54 @@
+name: 🤖 Propose a new agent
+description: Suggest a new specialist (Android, Rust, Data, SRE, etc.) for Forge.
+labels: ["agent-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Forge's strength is *specialized* agents, not generic ones. Be concrete.
+  - type: input
+    id: agent-name
+    attributes:
+      label: Agent name
+      description: Use kebab-case, matches folder under `agents/`.
+      placeholder: android-kotlin
+    validations:
+      required: true
+  - type: textarea
+    id: role
+    attributes:
+      label: Role
+      description: One sentence — what the agent is responsible for.
+      placeholder: You are the Android/Kotlin specialist. You write production-quality Android apps using Jetpack Compose and modern Kotlin.
+    validations:
+      required: true
+  - type: textarea
+    id: expertise
+    attributes:
+      label: Expertise list
+      description: Bullet list of concrete technologies this agent masters.
+      render: markdown
+      placeholder: |
+        - Kotlin 2.0+, coroutines, Flow
+        - Jetpack Compose, Material 3
+        - Room, DataStore, WorkManager
+    validations:
+      required: true
+  - type: textarea
+    id: antipatterns
+    attributes:
+      label: Anti-patterns
+      description: 5+ specific failure modes this agent must avoid (banned patterns with a brief why).
+      render: markdown
+      placeholder: |
+        - ❌ Blocking on Main thread — use coroutines
+        - ❌ GlobalScope — use structured concurrency
+    validations:
+      required: true
+  - type: textarea
+    id: overlap
+    attributes:
+      label: Overlap with existing agents
+      description: How is this different from iOS/Swift, Frontend-Web, Backend, etc.?
+    validations:
+      required: true
