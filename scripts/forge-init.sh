@@ -10,6 +10,7 @@
 #   ./scripts/forge-init.sh ~/code/calc "Calc" --template vanilla-static
 #   ./scripts/forge-init.sh ~/code/web "Web" --template nextjs-supabase
 #   ./scripts/forge-init.sh ~/code/ios-app "iOS App" --template swiftui-ios
+#   ./scripts/forge-init.sh ~/code/api "API" --template fastapi-postgres
 #
 # What it does:
 #   1. Creates the target directory (if it doesn't exist)
@@ -50,7 +51,7 @@ done
 
 if [[ -z "$TARGET" ]]; then
   echo "Usage: $0 <target-directory> [project-name] [--template <name>]" >&2
-  echo "Templates available: vanilla-static, nextjs-supabase, swiftui-ios" >&2
+  echo "Templates available: vanilla-static, nextjs-supabase, swiftui-ios, fastapi-postgres" >&2
   exit 1
 fi
 
@@ -73,18 +74,27 @@ mkdir -p "$TARGET"
 
 # Copy Forge brain
 cp "$FORGE_ROOT/CLAUDE.md" "$TARGET/CLAUDE.md"
+cp "$FORGE_ROOT/AGENTS.md" "$TARGET/AGENTS.md"
 cp -R "$FORGE_ROOT/agents" "$TARGET/agents"
 cp -R "$FORGE_ROOT/project_context" "$TARGET/project_context"
 cp "$FORGE_ROOT/.gitignore" "$TARGET/.gitignore"
 
-# Copy Claude Code subagent definitions (.claude/agents/) — these register
-# real subagents in the new project so the Orchestrator can dispatch heavy
-# work (iOS, Frontend, Backend, ML, QA, DevOps) via the Task tool.
+# Copy Claude Code project config (.claude/):
+#   agents/        — subagent registrations so the Orchestrator can dispatch
+#                    heavy work (iOS, Frontend, Backend, ML, QA, DevOps)
+#   skills/        — /forge-* slash commands (status, task, qa, ship, retro)
+#   settings.json  — shared guardrails (secret-file deny rules) + hooks
 # NOTE: .claude/settings.local.json is intentionally NOT copied — it's
 # per-user machine state, not shared project config.
+mkdir -p "$TARGET/.claude"
 if [[ -d "$FORGE_ROOT/.claude/agents" ]]; then
-  mkdir -p "$TARGET/.claude"
   cp -R "$FORGE_ROOT/.claude/agents" "$TARGET/.claude/agents"
+fi
+if [[ -d "$FORGE_ROOT/.claude/skills" ]]; then
+  cp -R "$FORGE_ROOT/.claude/skills" "$TARGET/.claude/skills"
+fi
+if [[ -f "$FORGE_ROOT/.claude/settings.json" ]]; then
+  cp "$FORGE_ROOT/.claude/settings.json" "$TARGET/.claude/settings.json"
 fi
 
 # Layer template on top (if any)
@@ -159,6 +169,21 @@ elif [[ "$TEMPLATE" == "swiftui-ios" ]]; then
 
 See `Sources/` for the MVVM starter.
 EOF
+elif [[ "$TEMPLATE" == "fastapi-postgres" ]]; then
+  cat >> "$TARGET/README.md" <<'EOF'
+
+## Run (FastAPI + Postgres)
+
+```bash
+docker compose up -d db      # start Postgres 16
+uv sync --extra dev          # or: pip install -e ".[dev]"
+cp .env.example .env
+uv run uvicorn app.main:app --reload
+uv run pytest                # run tests
+```
+
+API docs at http://localhost:8000/docs — health checks at `/health` and `/health/db`.
+EOF
 fi
 
 # Git init. If the user hasn't configured git identity (e.g. CI, fresh machine),
@@ -197,6 +222,10 @@ case "$TEMPLATE" in
     ;;
   swiftui-ios)
     echo "  # Create an Xcode project, copy Sources/ in"
+    echo "  claude            # then describe what you want to build"
+    ;;
+  fastapi-postgres)
+    echo "  docker compose up -d db && uv sync --extra dev && cp .env.example .env"
     echo "  claude            # then describe what you want to build"
     ;;
   *)

@@ -4,7 +4,7 @@ Thanks for your interest. Forge is a set of prompts and conventions, not runtime
 
 ## Ways to contribute
 
-- **Add an agent** — a new specialist (e.g., Android/Kotlin, Data/Analytics, SRE). Follow the format in `agents/*/CLAUDE.md`.
+- **Add an agent** — a new specialist (e.g., Android/Kotlin, Data/Analytics, SRE). Follow the format in `agents/*/CLAUDE.md`, register it as a subagent in `.claude/agents/<name>.md` (frontmatter: `name`, `description`, `tools`, `model`), and add a row to the table in root `CLAUDE.md`.
 - **Improve an agent** — tighten instructions, add/remove expertise, add anti-patterns learned the hard way.
 - **Add a template** — starter project files for a specific stack in `templates/`.
 - **Add an example** — a worked walkthrough of Forge building something real, in `examples/`.
@@ -33,8 +33,9 @@ Rules for writing prompts:
 3. Keep PRs focused — one agent or one fix per PR
 4. In the PR description, explain *why* the change helps Forge build better MVPs
 5. CI will run ShellCheck on `scripts/`, validate every agent prompt has the
-   required sections, and smoke-test `forge-init.sh` against all templates.
-   Green CI is required before review.
+   required sections, check `.claude/` config (subagent frontmatter, skill
+   frontmatter, `settings.json` validity, QA staying read-only), and smoke-test
+   `forge-init.sh` against all templates. Green CI is required before review.
 
 ## Code of conduct
 

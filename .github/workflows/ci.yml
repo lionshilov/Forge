@@ -31,15 +31,23 @@ jobs:
         run: ./scripts/forge-init.sh /tmp/forge-next "Next" --template nextjs-supabase
       - name: Bootstrap swiftui-ios template
         run: ./scripts/forge-init.sh /tmp/forge-ios "iOS" --template swiftui-ios
+      - name: Bootstrap fastapi-postgres template
+        run: ./scripts/forge-init.sh /tmp/forge-api "API" --template fastapi-postgres
       - name: Verify all projects have required files
         run: |
           set -euo pipefail
-          for dir in /tmp/forge-bare /tmp/forge-vanilla /tmp/forge-next /tmp/forge-ios; do
-            for f in CLAUDE.md README.md agents project_context; do
+          for dir in /tmp/forge-bare /tmp/forge-vanilla /tmp/forge-next /tmp/forge-ios /tmp/forge-api; do
+            for f in CLAUDE.md AGENTS.md README.md agents project_context .claude/agents .claude/skills .claude/settings.json; do
               test -e "$dir/$f" || { echo "❌ Missing $f in $dir"; exit 1; }
             done
             echo "✓ $dir has required structure"
           done
+      - name: FastAPI template Python syntax check
+        run: |
+          set -euo pipefail
+          find /tmp/forge-api/app /tmp/forge-api/tests -name '*.py' -print0 \
+            | xargs -0 python3 -m py_compile
+          echo "✓ fastapi-postgres Python files compile"
 
   agent-structure:
     name: Agent prompt structure
@@ -65,6 +73,52 @@ jobs:
             fi
           done
           exit $failed
+
+  claude-config:
+    name: Claude Code config (subagents, skills, settings)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Subagent frontmatter is complete
+        run: |
+          set -euo pipefail
+          failed=0
+          for f in .claude/agents/*.md; do
+            missing=""
+            for key in name description tools; do
+              grep -q "^$key:" "$f" || missing="$missing $key"
+            done
+            if [ -n "$missing" ]; then
+              echo "❌ $f missing frontmatter key(s):$missing"
+              failed=1
+            else
+              echo "✓ $f"
+            fi
+          done
+          # QA must stay read-only — a reviewer that can patch code can't be trusted to report honestly
+          if grep '^tools:' .claude/agents/qa.md | grep -qE 'Write|Edit'; then
+            echo "❌ qa subagent must not have Write/Edit tools"
+            failed=1
+          fi
+          exit $failed
+      - name: Skills have frontmatter
+        run: |
+          set -euo pipefail
+          failed=0
+          for f in .claude/skills/*/SKILL.md; do
+            missing=""
+            grep -q '^name:' "$f" || missing="$missing name"
+            grep -q '^description:' "$f" || missing="$missing description"
+            if [ -n "$missing" ]; then
+              echo "❌ $f missing frontmatter key(s):$missing"
+              failed=1
+            else
+              echo "✓ $f"
+            fi
+          done
+          exit $failed
+      - name: settings.json is valid JSON
+        run: python3 -m json.tool .claude/settings.json > /dev/null && echo "✓ .claude/settings.json"
 
   markdown-links:
     name: Markdown links

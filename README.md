@@ -23,8 +23,10 @@
 - 🧠 **One generalist prompt ≠ a team.** Forge gives you *twelve* deep specialists instead of one shallow everything-agent.
 - 🗂️ **Shared memory that survives handoffs.** Every agent reads `project_context/` first — nothing gets lost between steps.
 - 🛡️ **QA is mandatory, not optional.** No output ships until reviewed against your project's explicit conventions.
+- ⌨️ **The loop is one keystroke away.** `/forge-status`, `/forge-task`, `/forge-qa`, `/forge-ship`, `/forge-retro` — the whole workflow ships as slash commands.
+- 🔒 **Guardrails checked in.** Shared `.claude/settings.json` denies agents access to `.env`, keys, and secrets; a session hook auto-loads task status so no session starts blind.
 - 🔌 **Zero install.** No framework, no runtime — just Markdown prompts and a folder convention. Drop it into any repo.
-- 🧩 **Fork-friendly.** Every agent is one file. Swap, tweak, or add specialists in minutes.
+- 🧩 **Fork-friendly.** Every agent is one file. Swap, tweak, or add specialists in minutes. `AGENTS.md` makes it portable to Cursor, Codex & friends.
 
 ---
 
@@ -185,6 +187,7 @@ Skip the scaffolding and start with a working stack:
 ./scripts/forge-init.sh ~/code/my-tool "My Tool" --template vanilla-static
 ./scripts/forge-init.sh ~/code/my-web  "My Web"  --template nextjs-supabase
 ./scripts/forge-init.sh ~/code/my-ios  "My iOS" --template swiftui-ios
+./scripts/forge-init.sh ~/code/my-api  "My API" --template fastapi-postgres
 ```
 
 | Template | What you get |
@@ -192,6 +195,7 @@ Skip the scaffolding and start with a working stack:
 | `vanilla-static` | Single `index.html`, dark theme, GitHub Pages workflow — zero build step |
 | `nextjs-supabase` | Next.js 15 App Router + Supabase (SSR), Tailwind, TypeScript strict |
 | `swiftui-ios` | SwiftUI MVVM drop-in (`@Observable`), APIClient, Theme tokens |
+| `fastapi-postgres` | Async FastAPI + SQLAlchemy 2.0 + Postgres (docker-compose), pytest, ruff |
 
 ---
 
@@ -216,16 +220,37 @@ Every agent is one Markdown file under `agents/<name>/CLAUDE.md`. Read it, tweak
 
 ### Dispatch: role-switch vs subagent
 
-Forge ships two dispatch modes; the Orchestrator picks per task:
+All 12 agents are registered as Claude Code subagents in `.claude/agents/`; the Orchestrator picks the mode per task:
 
-- **role-switch** (Product, Designer, Architect, Analyst, Security, Docs) — Orchestrator reads the agent's prompt into the current context. Cheap, visible, good for agents that mostly author a single `project_context/*.md` file.
-- **subagent** (iOS, Frontend-Web, Backend, ML/CV, QA, DevOps) — Orchestrator calls Claude Code's `Task` tool with `subagent_type: "<name>"`, registered in `.claude/agents/<name>.md`. Each subagent runs in an isolated context with scoped tools, which means:
+- **role-switch** (default for Product, Designer, Architect, Analyst, Security, Docs) — Orchestrator reads the agent's prompt into the current context. Cheap, visible, and keeps the live dialog: Product can ask you clarifying questions directly.
+- **subagent** (default for iOS, Frontend-Web, Backend, ML/CV, QA, DevOps) — Orchestrator calls Claude Code's `Task` tool with `subagent_type: "<name>"`, registered in `.claude/agents/<name>.md`. Each subagent runs in an isolated context with scoped tools, which means:
   - Heavy code generation doesn't clog the main thread
   - Frontend + Backend can run in parallel
   - QA is *read-only* by design — it literally cannot patch the code under review
   - DevOps tool scope is constrained separately from Backend
 
+The strategy agents can also run as subagents when no live dialog is needed (the brief is complete, or several strategy tasks run in parallel). Since an isolated subagent can't ask you anything, their registrations enforce one rule: **return open questions instead of inventing answers** — the Orchestrator relays them and re-dispatches.
+
 Both modes read from the same `project_context/` — handoffs are still consistent.
+
+### The loop as slash commands
+
+Every phase of the loop is invocable directly — no need to re-explain the workflow to Claude:
+
+| Command | What it does |
+|---|---|
+| `/forge-status` | Task board + recent failures + git reality check; recommends the next action |
+| `/forge-task <desc>` | Decomposes a feature into atomic subtasks, records them in `PROGRESS.md`, dispatches |
+| `/forge-qa [scope]` | Independent review via the read-only `qa` subagent; enforces the pass/fail loop |
+| `/forge-ship` | Pre-ship gate: Security re-review → DevOps → Docs |
+| `/forge-retro` | Distills session lessons into `ERRORS_LOG.md` / `CONVENTIONS.md` — the system learns |
+
+### Guardrails & continuity, checked in
+
+`.claude/settings.json` ships with the project (and into everything `forge-init.sh` bootstraps):
+
+- **Secret hygiene** — agents are denied `Read` access to `.env`, `.env.local`, `*.pem`, `*.key`, `secrets/**`. (`.env.example` stays readable on purpose.)
+- **Session continuity** — a `SessionStart` hook auto-loads the top of `project_context/PROGRESS.md`, so a fresh session resumes where the last one stopped instead of starting blind.
 
 ---
 
@@ -234,6 +259,7 @@ Both modes read from the same `project_context/` — handoffs are still consiste
 ```
 forge/
 ├── CLAUDE.md                    ← Orchestrator prompt (auto-loaded by Claude Code)
+├── AGENTS.md                    ← Same system for other AI tools (agents.md standard)
 ├── README.md
 ├── LICENSE                      ← MIT
 ├── CONTRIBUTING.md
@@ -249,13 +275,15 @@ forge/
 │   ├── SECURITY.md
 │   ├── ERRORS_LOG.md
 │   └── PROGRESS.md
-├── .claude/agents/              ← Claude Code subagent registrations
-│   ├── ios-swift.md             ← heavy / parallelizable agents get
-│   ├── frontend-web.md            isolated context via Task tool
-│   ├── backend.md                 (YAML frontmatter: name, tools, model)
-│   ├── ml-cv.md
-│   ├── qa.md                    ← read-only by design
-│   └── devops.md
+├── .claude/
+│   ├── settings.json            ← Shared guardrails: secret deny-rules + session hook
+│   ├── skills/                  ← Slash commands: /forge-status, -task, -qa, -ship, -retro
+│   └── agents/                  ← All 12 agents registered as Claude Code subagents
+│       ├── product.md …         ← strategy agents (model: inherit) — role-switch
+│       │                          by default, subagent when no dialog needed
+│       ├── ios-swift.md …       ← implementation agents (model: sonnet) —
+│       │                          isolated context via Task tool
+│       └── qa.md                ← read-only by design (CI enforces it)
 ├── agents/                      ← One folder per specialist (full prompts)
 │   ├── product/
 │   ├── designer/
@@ -349,7 +377,7 @@ Nothing. Forge is Markdown prompts and a folder convention. The runtime is [Clau
 <details>
 <summary><b>Does this work with Cursor / Windsurf / other AI IDEs?</b></summary>
 
-It's designed for Claude Code because it relies on the root `CLAUDE.md` auto-loading convention. Adapting to Cursor rules or Windsurf is straightforward — PRs welcome.
+Yes, in role-switch mode. Forge ships an [`AGENTS.md`](./AGENTS.md) (the [agents.md](https://agents.md) open standard read by Cursor, Codex, Zed and others) that tells any AI agent how to run the system: adopt the Orchestrator role from `CLAUDE.md`, dispatch by reading `agents/<name>/CLAUDE.md` into context, keep `project_context/` honest. Claude Code additionally gets isolated subagents, slash commands, and hooks — those are runtime-specific.
 </details>
 
 <details>

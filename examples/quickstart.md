@@ -34,6 +34,18 @@ At every step the Orchestrator updates `project_context/PROGRESS.md` so you can 
 
 You'll mostly be answering product questions (*"should reminders pause during workouts?"*) and approving or rejecting QA verdicts. You're not writing boilerplate — you're making decisions.
 
+The loop is also directly invocable as slash commands:
+
+```
+/forge-status          # where are we? what's next?
+/forge-task <feature>  # decompose + dispatch a new piece of work
+/forge-qa              # independent review of the latest changes
+/forge-ship            # security re-review → CI/CD → docs
+/forge-retro           # end of session: persist lessons into ERRORS_LOG.md
+```
+
+Coming back tomorrow? Just open `claude` — a session hook auto-loads `PROGRESS.md`, and `/forge-status` reconciles the board against git before anything new is dispatched.
+
 ## 5. When to step in manually
 
 - Tight deadlines with a narrow cut — override the Orchestrator and call an agent directly

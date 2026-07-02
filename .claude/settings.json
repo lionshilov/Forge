@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./secrets/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f project_context/PROGRESS.md ]; then echo '── project_context/PROGRESS.md (auto-loaded for session continuity) ──'; head -60 project_context/PROGRESS.md; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
