@@ -4,7 +4,7 @@ Thanks for your interest. Forge is a set of prompts and conventions, not runtime
 
 ## Ways to contribute
 
-- **Add an agent** — a new specialist (e.g., Android/Kotlin, Data/Analytics, SRE). Follow the format in `agents/*/CLAUDE.md`, register it as a subagent in `.claude/agents/<name>.md` (frontmatter: `name`, `description`, `tools`, `model`), and add a row to the table in root `CLAUDE.md`.
+- **Add an agent** — a new specialist (e.g., Android/Kotlin, Data/Analytics, SRE). Follow the format in `agents/*/CLAUDE.md`, register it as a subagent in `.claude/agents/<name>.md` (frontmatter: `name`, `description`, `tools`, `model`), add a row to the table in root `CLAUDE.md`, and give it prerequisites in the `RULES` table of `.claude/hooks/forge-gate.sh` (which `project_context/` files must be `ready` before it may start).
 - **Improve an agent** — tighten instructions, add/remove expertise, add anti-patterns learned the hard way.
 - **Add a template** — starter project files for a specific stack in `templates/`.
 - **Add an example** — a worked walkthrough of Forge building something real, in `examples/`.
@@ -32,9 +32,12 @@ Rules for writing prompts:
 2. Create a branch: `feat/new-agent-android` or `fix/architect-prompt`
 3. Keep PRs focused — one agent or one fix per PR
 4. In the PR description, explain *why* the change helps Forge build better MVPs
-5. CI will run ShellCheck on `scripts/`, validate every agent prompt has the
-   required sections, check `.claude/` config (subagent frontmatter, skill
-   frontmatter, `settings.json` validity, QA staying read-only), and smoke-test
+5. CI will run ShellCheck on `scripts/` and `.claude/hooks/`, validate every
+   agent prompt has the required sections, check `.claude/` config (subagent
+   frontmatter, skill frontmatter, `settings.json` validity, QA staying
+   read-only), check the agent roster stays in sync across `agents/`,
+   `.claude/agents/`, root `CLAUDE.md` and the gate rules, run the phase-gate
+   tests (`./scripts/test-forge-gate.sh` — run it locally too), and smoke-test
    `forge-init.sh` against all templates. Green CI is required before review.
 
 ## Code of conduct

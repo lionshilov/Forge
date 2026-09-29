@@ -26,6 +26,11 @@ Read IN ORDER:
 
 ## ANALYTICS.md Template
 ```
+---
+status: ready  # draft while a KPI can't be instrumented yet
+owner: analyst
+---
+
 # Analytics
 
 ## Tooling
@@ -79,6 +84,7 @@ Read IN ORDER:
 - [ ] Funnels name the drop-off step you expect to be the weakest link
 - [ ] Experiments (if any) have hypothesis + primary metric + sample size
 - [ ] Frontend/iOS/Backend can implement this without another meeting
+- [ ] Front matter `status:` set last — `ready`, or `draft` while a KPI can't be instrumented yet
 
 ## Anti-Patterns
 - ❌ "Track everything, we'll figure it out later" — you won't, and the warehouse bill will hurt

@@ -24,7 +24,8 @@
 - 🗂️ **Shared memory that survives handoffs.** Every agent reads `project_context/` first — nothing gets lost between steps.
 - 🛡️ **QA is mandatory, not optional.** No output ships until reviewed against your project's explicit conventions.
 - ⌨️ **The loop is one keystroke away.** `/forge-status`, `/forge-task`, `/forge-qa`, `/forge-ship`, `/forge-retro` — the whole workflow ships as slash commands.
-- 🔒 **Guardrails checked in.** Shared `.claude/settings.json` denies agents access to `.env`, keys, and secrets; a session hook auto-loads task status so no session starts blind.
+- 🚦 **Rules enforced by the harness, not by hope.** Phase gates block an implementation agent until the spec, design, and architecture it builds on are marked `ready` — the routing rules hold even when the model forgets them.
+- 🔒 **Guardrails checked in.** Shared `.claude/settings.json` denies agents access to `.env`, keys, and secrets; a session hook loads the gate board and open tasks so no session starts blind.
 - 🔌 **Zero install.** No framework, no runtime — just Markdown prompts and a folder convention. Drop it into any repo.
 - 🧩 **Fork-friendly.** Every agent is one file. Swap, tweak, or add specialists in minutes. `AGENTS.md` makes it portable to Cursor, Codex & friends.
 
@@ -239,7 +240,7 @@ Every phase of the loop is invocable directly — no need to re-explain the work
 
 | Command | What it does |
 |---|---|
-| `/forge-status` | Task board + recent failures + git reality check; recommends the next action |
+| `/forge-status` | Gate board + task board + recent failures + git reality check; recommends the next action |
 | `/forge-task <desc>` | Decomposes a feature into atomic subtasks, records them in `PROGRESS.md`, dispatches |
 | `/forge-qa [scope]` | Independent review via the read-only `qa` subagent; enforces the pass/fail loop |
 | `/forge-ship` | Pre-ship gate: Security re-review → DevOps → Docs |
@@ -247,10 +248,34 @@ Every phase of the loop is invocable directly — no need to re-explain the work
 
 ### Guardrails & continuity, checked in
 
-`.claude/settings.json` ships with the project (and into everything `forge-init.sh` bootstraps):
+`.claude/settings.json` and `.claude/hooks/` ship with the project (and into everything `forge-init.sh` bootstraps):
 
+- **Phase gates** — the Routing Rules are enforced by a `PreToolUse` hook instead of being left to the model's memory. Each spec file in `project_context/` opens with `status: template → draft → ready` (or `n/a`) front matter, set by the agent that owns it. Dispatching an agent whose prerequisites aren't `ready` is blocked, and the block tells the Orchestrator exactly which files and owners to route to:
+
+  ```
+  Forge gate closed: the ios-swift agent can't start yet — its prerequisites in project_context/ aren't ready (Routing Rules, root CLAUDE.md):
+    ✗ DESIGN.md — draft (owner: designer)
+  ```
+
+  Skipping a gate is possible, but only as the user's explicit decision, recorded with a reason (`FORGE_GATES=off` turns enforcement off for a session). The gate script is plain bash with a test suite — `./scripts/test-forge-gate.sh` — and other AI tools can run the same check: `bash .claude/hooks/forge-gate.sh check <agent>`.
 - **Secret hygiene** — agents are denied `Read` access to `.env`, `.env.local`, `*.pem`, `*.key`, `secrets/**`. (`.env.example` stays readable on purpose.)
-- **Session continuity** — a `SessionStart` hook auto-loads the top of `project_context/PROGRESS.md`, so a fresh session resumes where the last one stopped instead of starting blind.
+- **Session continuity** — a `SessionStart` hook injects the gate board, every open task from `PROGRESS.md`, and the latest `ERRORS_LOG.md` entries, so a fresh session resumes where the last one stopped instead of starting blind:
+
+  ```
+  ── Forge session board (auto-loaded by .claude/hooks/forge-gate.sh) ──
+  Phase gates — status: in project_context/ front matter (template → draft → ready | n/a):
+    ✓ PRODUCT.md       ready
+    ✗ DESIGN.md        draft     owner: designer   → blocks ios-swift, frontend-web
+    ✓ ARCHITECTURE.md  ready
+    ✓ CONVENTIONS.md   ready
+    ✓ INTERFACES.md    ready
+    ✗ ANALYTICS.md     template  owner: analyst
+    ✗ SECURITY.md      template  owner: security   → blocks devops
+  Tasks (PROGRESS.md): 4 total — 🟢 2 done · 🟡 1 in progress · 🔁 0 in review · 🔴 0 blocked · ❌ 0 failed · ⚪ 1 not started
+  | T-03 | Reminder scheduler | ios-swift | ⚪ | T-02 | gated on DESIGN.md |
+  | T-04 | Design tokens + onboarding flow | designer | 🟡 | T-01 | 1 question for the user |
+  Errors (ERRORS_LOG.md): none logged
+  ```
 
 ---
 
@@ -276,7 +301,8 @@ forge/
 │   ├── ERRORS_LOG.md
 │   └── PROGRESS.md
 ├── .claude/
-│   ├── settings.json            ← Shared guardrails: secret deny-rules + session hook
+│   ├── settings.json            ← Shared guardrails: secret deny-rules + hooks
+│   ├── hooks/forge-gate.sh      ← Phase gates (PreToolUse) + session board (SessionStart)
 │   ├── skills/                  ← Slash commands: /forge-status, -task, -qa, -ship, -retro
 │   └── agents/                  ← All 12 agents registered as Claude Code subagents
 │       ├── product.md …         ← strategy agents (model: inherit) — role-switch
@@ -311,13 +337,16 @@ You're mostly making **decisions**, not typing code:
 ```
 You:       "An app that reminds me to drink water based on activity."
 
-Orchestrator → Product:    ✍️  Drafts PRODUCT.md, asks you 3 questions
+Orchestrator → Product:    ✍️  Drafts PRODUCT.md (status: draft), asks you 3 questions
 You:                       Answer the questions
-Product:                   PRODUCT.md finalized
+Product:                   PRODUCT.md → status: ready
 
+Orchestrator → Designer:   🎨  Tokens, screens, a11y floor → DESIGN.md ready
 Orchestrator → Architect:  ✍️  Chooses SwiftUI + HealthKit, writes ARCHITECTURE.md
 Orchestrator → Architect:  ✍️  Defines INTERFACES.md (HealthKit reads, notification schedule)
+Orchestrator → Security:   🔒  Threat model: health data stays on-device → SECURITY.md
 
+Orchestrator → iOS:        🚦  Gate open (spec, design, architecture ready)
 Orchestrator → iOS:        🔨  Implements hydration tracking screen
 Orchestrator → QA:         🔍  Flags: missing accessibility labels, line 42
 Orchestrator → iOS:        🔨  Fixes issues
@@ -359,7 +388,7 @@ mkdir agents/android-kotlin
 $EDITOR agents/android-kotlin/CLAUDE.md
 # Follow the format in any existing agent
 ```
-Then add a row to the table in root `CLAUDE.md` so the Orchestrator knows about it. See [CONTRIBUTING.md](./CONTRIBUTING.md).
+Then add a row to the table in root `CLAUDE.md` so the Orchestrator knows about it, register it in `.claude/agents/`, and give it prerequisites in the `RULES` table of `.claude/hooks/forge-gate.sh` — CI fails if any of the four drift apart. See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ### Enforce your house style
 Fill in `project_context/CONVENTIONS.md` *before* running Forge on a real project. QA will enforce every rule you put there.

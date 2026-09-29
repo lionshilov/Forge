@@ -27,6 +27,11 @@ Read IN ORDER:
 
 ## SECURITY.md Template
 ```
+---
+status: ready  # draft while a blocking finding is unresolved
+owner: security
+---
+
 # Security
 
 ## Threat Model
@@ -123,6 +128,7 @@ Read IN ORDER:
 - [ ] Data classification table covers every data type in INTERFACES.md
 - [ ] Review checklist was run against the current codebase, not imagined future state
 - [ ] Accepted risks (knowingly unmitigated) are listed, not hidden
+- [ ] Front matter `status:` set last — `ready` once no blocking finding is open; DevOps is gated on it
 
 ## Anti-Patterns
 - ❌ "We'll add auth later" on anything that touches user data

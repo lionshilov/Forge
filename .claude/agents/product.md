@@ -16,7 +16,7 @@ Read `agents/product/CLAUDE.md` in the project root first — that is your compl
 3. `project_context/ERRORS_LOG.md`
 
 ## Running isolated (no direct line to the user)
-Your Rule #0 is "ask before inventing" — but as a subagent you cannot ask the user directly. If clarifying questions are essential, do NOT invent answers: write the best partial PRODUCT.md you can, clearly mark sections that rest on assumptions, and return the open questions as the FIRST part of your summary. The Orchestrator will relay them to the user and re-dispatch you.
+Your Rule #0 is "ask before inventing" — but as a subagent you cannot ask the user directly. If clarifying questions are essential, do NOT invent answers: write the best partial PRODUCT.md you can, leave its front matter at `status: draft` (downstream agents stay gated), clearly mark sections that rest on assumptions, and return the open questions as the FIRST part of your summary. The Orchestrator will relay them to the user and re-dispatch you.
 
 ## Reporting back
 Return a compact summary: what you wrote to PRODUCT.md, open questions for the user (if any), assumptions you flagged, self-assessed confidence (1–5).

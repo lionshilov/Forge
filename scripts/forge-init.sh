@@ -83,6 +83,8 @@ cp "$FORGE_ROOT/.gitignore" "$TARGET/.gitignore"
 #   agents/        — subagent registrations so the Orchestrator can dispatch
 #                    heavy work (iOS, Frontend, Backend, ML, QA, DevOps)
 #   skills/        — /forge-* slash commands (status, task, qa, ship, retro)
+#   hooks/         — forge-gate.sh: phase gates on subagent dispatch + the
+#                    session board injected at SessionStart
 #   settings.json  — shared guardrails (secret-file deny rules) + hooks
 # NOTE: .claude/settings.local.json is intentionally NOT copied — it's
 # per-user machine state, not shared project config.
@@ -92,6 +94,9 @@ if [[ -d "$FORGE_ROOT/.claude/agents" ]]; then
 fi
 if [[ -d "$FORGE_ROOT/.claude/skills" ]]; then
   cp -R "$FORGE_ROOT/.claude/skills" "$TARGET/.claude/skills"
+fi
+if [[ -d "$FORGE_ROOT/.claude/hooks" ]]; then
+  cp -R "$FORGE_ROOT/.claude/hooks" "$TARGET/.claude/hooks"
 fi
 if [[ -f "$FORGE_ROOT/.claude/settings.json" ]]; then
   cp "$FORGE_ROOT/.claude/settings.json" "$TARGET/.claude/settings.json"
@@ -114,7 +119,7 @@ fi
 cat > "$TARGET/README.md" <<EOF
 # $PROJECT_NAME
 
-Bootstrapped with [Forge](https://github.com/)${TEMPLATE:+ using the \`$TEMPLATE\` template}.
+Bootstrapped with [Forge](https://github.com/lionshilov/Forge)${TEMPLATE:+ using the \`$TEMPLATE\` template}.
 
 ## Getting started
 
@@ -133,6 +138,10 @@ Cross-agent context lives in \`project_context/\`:
 - \`SECURITY.md\` — threat model, auth, secrets, data classification
 - \`ERRORS_LOG.md\` — failures and their fixes
 - \`PROGRESS.md\` — current task status
+
+The seven spec files open with \`status:\` front matter (\`template → draft → ready\`).
+Phase gates keep each agent from starting until what it builds on is \`ready\` —
+see the board any time with \`bash .claude/hooks/forge-gate.sh status\`.
 EOF
 
 # Template-specific run instructions

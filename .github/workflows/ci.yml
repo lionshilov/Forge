@@ -10,13 +10,15 @@ permissions:
 
 jobs:
   shellcheck:
-    name: ShellCheck (scripts/)
+    name: ShellCheck (scripts/, .claude/hooks/)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: ludeeus/action-shellcheck@master
-        with:
-          scandir: './scripts'
+      - name: Lint shell scripts
+        run: |
+          command -v shellcheck >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck; }
+          shellcheck --version | head -n 2
+          shellcheck scripts/*.sh .claude/hooks/*.sh
 
   smoke-test:
     name: forge-init.sh smoke test
@@ -37,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           for dir in /tmp/forge-bare /tmp/forge-vanilla /tmp/forge-next /tmp/forge-ios /tmp/forge-api; do
-            for f in CLAUDE.md AGENTS.md README.md agents project_context .claude/agents .claude/skills .claude/settings.json; do
+            for f in CLAUDE.md AGENTS.md README.md agents project_context .claude/agents .claude/skills .claude/hooks/forge-gate.sh .claude/settings.json; do
               test -e "$dir/$f" || { echo "❌ Missing $f in $dir"; exit 1; }
             done
             echo "✓ $dir has required structure"
@@ -119,6 +121,46 @@ jobs:
           exit $failed
       - name: settings.json is valid JSON
         run: python3 -m json.tool .claude/settings.json > /dev/null && echo "✓ .claude/settings.json"
+      - name: Agent roster is consistent (prompts, subagents, CLAUDE.md, gate rules)
+        run: |
+          set -euo pipefail
+          failed=0
+          for dir in agents/*/; do
+            name="$(basename "$dir")"
+            # The orchestrator is root CLAUDE.md itself, not a dispatchable agent
+            if [ "$name" = "orchestrator" ]; then continue; fi
+            if ! grep -qx "name: $name" ".claude/agents/$name.md" 2>/dev/null; then
+              echo "❌ $name: no .claude/agents/$name.md registering 'name: $name'"
+              failed=1
+            fi
+            if ! grep -q "agents/$name/" CLAUDE.md; then
+              echo "❌ $name: missing from the agent table in root CLAUDE.md"
+              failed=1
+            fi
+            rc=0
+            bash .claude/hooks/forge-gate.sh check "$name" > /dev/null 2>&1 || rc=$?
+            if [ "$rc" -eq 2 ]; then
+              echo "❌ $name: no routing rule in .claude/hooks/forge-gate.sh (RULES)"
+              failed=1
+            fi
+          done
+          for reg in .claude/agents/*.md; do
+            name="$(basename "$reg" .md)"
+            if [ ! -d "agents/$name" ]; then
+              echo "❌ $reg: no agents/$name/ prompt to point at"
+              failed=1
+            fi
+          done
+          [ "$failed" -eq 0 ] && echo "✓ roster consistent across agents/, .claude/agents/, CLAUDE.md, gate rules"
+          exit $failed
+
+  phase-gates:
+    name: Phase gates (hook behavior)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Gate hook enforces the routing rules on a bootstrapped project
+        run: ./scripts/test-forge-gate.sh
 
   markdown-links:
     name: Markdown links

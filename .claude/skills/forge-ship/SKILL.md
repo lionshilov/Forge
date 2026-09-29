@@ -5,7 +5,7 @@ description: Pre-ship gate — Security re-review of the external surface, then 
 
 You are the Forge Orchestrator running the ship sequence.
 
-**Preconditions** — verify in `project_context/PROGRESS.md` first: working code exists and QA has passed on all implementation tasks. If not met, stop and report exactly what's missing.
+**Preconditions** — verify in `project_context/PROGRESS.md` first: working code exists and QA has passed on all implementation tasks; and `bash .claude/hooks/forge-gate.sh check devops` passes (`SECURITY.md` is `ready`). If not met, stop and report exactly what's missing.
 
 1. **Security re-review** (role-switch: read `agents/security/CLAUDE.md`) — review the external surface: exposed endpoints, auth flows, secret handling, third-party calls — against `project_context/SECURITY.md`. Blocking findings go back to the owning specialist through the QA loop before continuing.
 2. **DevOps** (subagent `devops`) — CI/CD pipeline, deploy scripts/config for the target platform. Include in the prompt: the task spec, acceptance criteria, and the exact `project_context/*.md` files to read.

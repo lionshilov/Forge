@@ -15,7 +15,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f project_context/PROGRESS.md ]; then echo '── project_context/PROGRESS.md (auto-loaded for session continuity) ──'; head -60 project_context/PROGRESS.md; fi"
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/forge-gate.sh status"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}\"/.claude/hooks/forge-gate.sh hook"
           }
         ]
       }

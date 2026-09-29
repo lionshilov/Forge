@@ -27,6 +27,11 @@ A Product agent that confidently invents answers produces a worse spec than one 
 
 ## PRODUCT.md Template
 ```
+---
+status: ready  # draft while an open question still blocks the Architect
+owner: product
+---
+
 # Product
 
 ## One-Liner
@@ -76,6 +81,7 @@ Run this checklist on PRODUCT.md before the Architect takes over:
 - [ ] At least one success metric is numeric with a target value
 - [ ] Every explicit assumption has a validation path
 - [ ] Open questions list is non-empty (if it's empty, you probably invented answers)
+- [ ] Front matter `status:` set last — `ready`, or `draft` while an open question still blocks the Architect (Forge's phase gates read it)
 
 ## Anti-Patterns
 - ❌ Writing a spec for the user's dream product instead of the MVP

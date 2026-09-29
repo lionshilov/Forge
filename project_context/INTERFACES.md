@@ -1,3 +1,8 @@
+---
+status: template  # template → draft → ready | n/a — see "Phase Gates" in CLAUDE.md
+owner: architect
+---
+
 # Interfaces
 
 > Contracts between modules/agents. Defined by Architect BEFORE implementation starts.

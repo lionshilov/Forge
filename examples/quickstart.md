@@ -21,14 +21,18 @@ In Claude Code, paste:
 Claude (acting as the Orchestrator per root `CLAUDE.md`) will:
 
 1. **Route to Product** — fills in `project_context/PRODUCT.md` with target user, MVP scope, success metrics, open questions. May ask you 2–3 clarifying questions.
-2. **Route to Architect** — fills `ARCHITECTURE.md`, `CONVENTIONS.md`, `INTERFACES.md`. Picks the stack (probably SwiftUI + HealthKit for this).
-3. **Route to iOS agent** — implements screens, data layer, HealthKit reads.
-4. **Route to ML/CV if needed** — not needed for this MVP.
-5. **Route to QA** — reviews every agent output against `CONVENTIONS.md`.
-6. **Route to DevOps** — adds a Fastlane lane for TestFlight once there's working code.
-7. **Route to Docs** — writes the final README.
+2. **Route to Designer** — fills `DESIGN.md`: tokens, screens, the accessibility floor.
+3. **Route to Architect** — fills `ARCHITECTURE.md`, `CONVENTIONS.md`, `INTERFACES.md`. Picks the stack (probably SwiftUI + HealthKit for this).
+4. **Route to Security** — threat model in `SECURITY.md` (HealthKit data is health data — it gets classified and handled accordingly).
+5. **Route to iOS agent** — implements screens, data layer, HealthKit reads.
+6. **Route to ML/CV if needed** — not needed for this MVP.
+7. **Route to QA** — reviews every agent output against `CONVENTIONS.md`.
+8. **Route to DevOps** — adds a Fastlane lane for TestFlight once there's working code and Security has signed off.
+9. **Route to Docs** — writes the final README.
 
 At every step the Orchestrator updates `project_context/PROGRESS.md` so you can see what's done, what's in review, and what's blocked.
+
+The order isn't just a suggestion. Each spec file opens with a `status:` (`template → draft → ready`) that its owner sets when it's done, and a hook blocks the iOS agent until `PRODUCT.md`, `DESIGN.md` and the Architect's three files are `ready`. If Product still has an open question for you, `PRODUCT.md` stays `draft` — and nothing downstream starts on a guess.
 
 ## 4. How the loop feels
 
@@ -44,11 +48,11 @@ The loop is also directly invocable as slash commands:
 /forge-retro           # end of session: persist lessons into ERRORS_LOG.md
 ```
 
-Coming back tomorrow? Just open `claude` — a session hook auto-loads `PROGRESS.md`, and `/forge-status` reconciles the board against git before anything new is dispatched.
+Coming back tomorrow? Just open `claude` — a session hook auto-loads the gate board and every open task, and `/forge-status` reconciles the board against git before anything new is dispatched.
 
 ## 5. When to step in manually
 
-- Tight deadlines with a narrow cut — override the Orchestrator and call an agent directly
+- Tight deadlines with a narrow cut — override the Orchestrator and call an agent directly; if a phase gate blocks it, tell the Orchestrator to skip the gate — it records your reason in `PROGRESS.md` and dispatches anyway
 - Design/UX decisions — you're faster than the agents at taste calls
 - External integrations with weird auth — do the first call yourself, then hand off
 

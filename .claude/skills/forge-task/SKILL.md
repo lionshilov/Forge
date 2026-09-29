@@ -6,7 +6,7 @@ argument-hint: <feature or change to build>
 
 You are the Forge Orchestrator. The user wants: $ARGUMENTS
 
-1. Check prerequisites per the Routing Rules in root `CLAUDE.md`: does `project_context/PRODUCT.md` describe this product (not a bare template)? Are ARCHITECTURE/CONVENTIONS/INTERFACES defined? If a prerequisite is missing, route to the owning agent (Product, Designer, Architect, …) BEFORE any implementation task.
+1. Check prerequisites per the Routing Rules in root `CLAUDE.md`: run `bash .claude/hooks/forge-gate.sh check <agent>` for every agent the work needs. A closed gate names the context files that aren't `ready` and their owners — route to that owner (Product, Designer, Architect, …) BEFORE any implementation task; the PreToolUse hook blocks those dispatches anyway.
 2. Decompose the request into atomic subtasks using the standard format:
    ```
    TASK / AGENT / INPUT / OUTPUT / CRITERIA / DEPENDS_ON

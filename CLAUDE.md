@@ -46,14 +46,14 @@ Forge ships entry points into the core loop as skills under `.claude/skills/`. W
 
 | Command | What it does |
 |---------|--------------|
-| `/forge-status` | Status report from PROGRESS.md + ERRORS_LOG.md + git; recommends the next action |
+| `/forge-status` | Gate board + PROGRESS.md + ERRORS_LOG.md + git reality check; recommends the next action |
 | `/forge-task <desc>` | Decompose into atomic subtasks, record in PROGRESS.md, dispatch |
 | `/forge-qa [scope]` | Independent QA review via the read-only `qa` subagent, pass/fail loop |
 | `/forge-ship` | Pre-ship gate: Security re-review → DevOps → Docs |
 | `/forge-retro` | Distill session lessons into ERRORS_LOG.md / CONVENTIONS.md |
 
 ## Session Continuity
-- A `SessionStart` hook in `.claude/settings.json` auto-loads the top of `project_context/PROGRESS.md` at session start — treat it as the resume point
+- A `SessionStart` hook runs `.claude/hooks/forge-gate.sh status`: the phase-gate board, every open task from `PROGRESS.md`, and the latest `ERRORS_LOG.md` entries — treat it as the resume point
 - On a fresh session, reconcile PROGRESS.md against `git log` before dispatching anything new; fix stale statuses first
 - End substantial sessions with `/forge-retro` so lessons persist into ERRORS_LOG.md and CONVENTIONS.md instead of dying with the context window
 
@@ -68,6 +68,12 @@ Forge ships entry points into the core loop as skills under `.claude/skills/`. W
 8. If two agents need to collaborate (e.g., Frontend-Web + Backend), **Architect** defines the interface contract FIRST
 9. **DevOps** is called after first working code exists AND Security has signed off on the external surface
 10. **Docs** runs last, after QA approval
+
+## Phase Gates
+Routing Rules 1–6 and 9 are enforced by the harness, not left to memory:
+- Each gated context file — `PRODUCT`, `DESIGN`, `ARCHITECTURE`, `CONVENTIONS`, `INTERFACES`, `ANALYTICS`, `SECURITY` — opens with front matter `status: template → draft → ready`, or `n/a` when deliberately not needed (say why in the file). The owning agent sets it as the last step of its Before-Submitting checklist: `draft` while a blocking question remains, `ready` once downstream agents can build on it. You may flip `draft → ready` only to record the user's explicit sign-off.
+- A `PreToolUse` hook (`.claude/hooks/forge-gate.sh`) blocks subagent dispatch while any prerequisite is `template` or `draft`, and names the files and owners to route to. Role-switch isn't intercepted — run `bash .claude/hooks/forge-gate.sh check <agent>` before switching roles (exit 0 = gate open).
+- Skipping a gate is the user's call, never yours. If they explicitly decide to, re-dispatch with a line `forge-gate: skip — <their reason>` in the prompt and record the skip in `PROGRESS.md`. `FORGE_GATES=off` in the environment disables the hook for a whole session.
 
 ## Decomposition Rules
 - A subtask is **atomic** if one agent can complete it without input from another agent
@@ -115,3 +121,4 @@ Before delegating, ensure agents have access to:
 - ❌ Retry without specific feedback on what to fix
 - ❌ Assign a task to an agent outside its specialty
 - ❌ Let two agents modify the same file simultaneously
+- ❌ Flip a context file's `status` just to get past a gate, or add `forge-gate: skip` without the user's explicit decision

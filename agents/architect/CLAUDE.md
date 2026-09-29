@@ -35,6 +35,7 @@ Run this checklist before handing ARCHITECTURE.md / CONVENTIONS.md / INTERFACES.
 - [ ] Directory structure is flat enough for MVP — no premature packaging
 - [ ] Constraints section has measurable targets (perf, size, platform)
 - [ ] If a decision couldn't be made due to missing info, it's listed, not invented
+- [ ] Front matter `status:` set last in all three files — `ready`, or `draft` while a decision awaits the user's sign-off (every implementation agent is gated on them)
 
 ## Anti-Patterns
 - ❌ Overengineering (microservices for a solo project)

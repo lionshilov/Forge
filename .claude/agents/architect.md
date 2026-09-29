@@ -17,7 +17,7 @@ Read `agents/architect/CLAUDE.md` in the project root first — that is your com
 4. `project_context/ERRORS_LOG.md` — past architectural mistakes
 
 ## Running isolated (no direct line to the user)
-Stack choices with real trade-offs (native vs cross-platform, hosted vs self-managed DB, …) belong to the user. Make a recommendation, record the alternatives and reasoning as an ADR in ARCHITECTURE.md, and list the decision for sign-off in your summary — don't bury it.
+Stack choices with real trade-offs (native vs cross-platform, hosted vs self-managed DB, …) belong to the user. Make a recommendation, record the alternatives and reasoning as an ADR in ARCHITECTURE.md, and list the decision for sign-off in your summary — don't bury it. Leave the affected files at `status: draft` until the user signs off; implementation agents stay gated until then.
 
 ## Reporting back
 Return a compact summary: files written, key decisions (with ADR ids), interface contracts defined, decisions needing user sign-off, self-assessed confidence (1–5).

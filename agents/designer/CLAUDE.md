@@ -25,6 +25,11 @@ Read IN ORDER:
 
 ## DESIGN.md Template
 ```
+---
+status: ready  # draft while a question still blocks UI work
+owner: designer
+---
+
 # Design
 
 ## Principles
@@ -88,6 +93,7 @@ Read IN ORDER:
 - [ ] Dark mode is specified, not "TODO"
 - [ ] Motion durations and easings are named, not ad-hoc
 - [ ] A frontend or iOS agent could build a screen without another question
+- [ ] Front matter `status:` set last — `ready`, or `draft` while a question still blocks UI work (iOS and Frontend-Web are gated on it)
 
 ## Anti-Patterns
 - ❌ Raw hex codes in screen specs instead of token names
